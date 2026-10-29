@@ -11,8 +11,12 @@ st.set_page_config(
 # Sidebar Settings
 st.sidebar.markdown("## ⚙️ Academy Settings")
 
-# Hardcoded API Key - Yahan apni NEW ASLI API key paste karein (Line 15)
-API_KEY = "AQ.Ab8RN6L3l9sBOogrOD7oFwPBCaVbCS8bm5FZjendn8F4CqbLRQ"
+# Student API Key Input Field (Separate Option)
+user_api_key = st.sidebar.text_input(
+    "🔑 Enter Your Gemini API Key",
+    type="password",
+    help="Apni Google AI Studio se mili hui API key yahan paste karein."
+)
 
 # Model Selection
 selected_model = st.sidebar.selectbox(
@@ -46,7 +50,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = [
         {
             "role": "assistant",
-            "content": "Assalam-o-Alaikum, future trader! 😎 📈\n\nWelcome to SHAHROZ AI TRADING ACADEMY! ❤️\n\nMain tumhara friendly trading teacher hoon. Hum trading seekhenge, examples solve karenge aur thora hansenge bhi! 😂\n\nBatao, aaj kya seekhna hai?"
+            "content": "Assalam-o-Alaikum, future trader! 😎 📈\n\nWelcome to SHAHROZ AI TRADING ACADEMY! ❤️\n\nSidebar mein apni API key enter karein aur sawal poochein. Hum trading seekhenge aur maza bhi aayega! 😂\n\nBatao, aaj kya seekhna hai?"
         }
     ]
 
@@ -56,40 +60,44 @@ for message in st.session_state.messages:
 
 # Chat Input
 if prompt := st.chat_input("Apna trading sawal yahan likho..."):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
+    # Check if student has entered the API key
+    if not user_api_key:
+        st.error("⚠️ Pehle sidebar mein apni Gemini API Key enter karein!")
+    else:
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
 
-    with st.chat_message("assistant"):
-        message_placeholder = st.empty()
-        
-        try:
-            # Initialize Gemini Client
-            client = genai.Client(api_key=API_KEY)
+        with st.chat_message("assistant"):
+            message_placeholder = st.empty()
             
-            system_instruction = f"""
-            You are a world-class trading mentor at SHAHROZ AI TRADING ACADEMY.
-            Your personality is {personality}.
-            You teach forex (XAUUSD/Gold), MT5, stocks, and crypto.
-            You must reply in {language}. Keep the tone engaging, helpful, and educational.
-            """
-            
-            contents = []
-            for m in st.session_state.messages:
-                role_name = "user" if m["role"] == "user" else "model"
-                contents.append({"role": role_name, "parts": [{"text": m["content"]}]})
-            
-            response = client.models.generate_content(
-                model=selected_model,
-                contents=contents,
-                config={
-                    'system_instruction': system_instruction,
-                }
-            )
-            response_text = response.text
-            message_placeholder.markdown(response_text)
-        except Exception as e:
-            response_text = f"❌ Error: {str(e)}"
-            message_placeholder.markdown(response_text)
+            try:
+                # Initialize Gemini Client with user's provided API Key
+                client = genai.Client(api_key=user_api_key)
+                
+                system_instruction = f"""
+                You are a world-class trading mentor at SHAHROZ AI TRADING ACADEMY.
+                Your personality is {personality}.
+                You teach forex (XAUUSD/Gold), MT5, stocks, and crypto.
+                You must reply in {language}. Keep the tone engaging, helpful, and educational.
+                """
+                
+                contents = []
+                for m in st.session_state.messages:
+                    role_name = "user" if m["role"] == "user" else "model"
+                    contents.append({"role": role_name, "parts": [{"text": m["content"]}]})
+                
+                response = client.models.generate_content(
+                    model=selected_model,
+                    contents=contents,
+                    config={
+                        'system_instruction': system_instruction,
+                    }
+                )
+                response_text = response.text
+                message_placeholder.markdown(response_text)
+            except Exception as e:
+                response_text = f"❌ Error: {str(e)}"
+                message_placeholder.markdown(response_text)
 
-        st.session_state.messages.append({"role": "assistant", "content": response_text})
+            st.session_state.messages.append({"role": "assistant", "content": response_text})
