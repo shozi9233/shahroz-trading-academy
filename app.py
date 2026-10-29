@@ -18,10 +18,10 @@ user_api_key = st.sidebar.text_input(
     help="Apni Google AI Studio se mili hui API key yahan paste karein."
 )
 
-# Model Selection - Standard Stable Models for Free Tier
+# Model Selection - Using gemini-3.5-flash as requested
 selected_model = st.sidebar.selectbox(
     "Choose Gemini Model",
-    ["gemini-1.5-flash", "gemini-1.5-pro"]
+    ["gemini-3.5-flash", "gemini-2.5-pro"]
 )
 
 # Teaching Language
@@ -82,7 +82,7 @@ if prompt := st.chat_input("Apna trading sawal yahan likho..."):
                 You must reply in {language}. Keep the tone engaging, helpful, and educational.
                 """
                 
-                # Limit conversation history to last 6 messages to avoid Rate Limit errors
+                # Limit conversation history to last 6 messages
                 recent_messages = st.session_state.messages[-6:]
                 contents = []
                 for m in recent_messages:
