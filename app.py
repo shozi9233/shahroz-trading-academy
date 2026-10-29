@@ -11,17 +11,17 @@ st.set_page_config(
 # Sidebar Settings
 st.sidebar.markdown("## ⚙️ Academy Settings")
 
-# Student API Key Input Field (Separate Option)
+# Student API Key Input Field
 user_api_key = st.sidebar.text_input(
     "🔑 Enter Your Gemini API Key",
     type="password",
     help="Apni Google AI Studio se mili hui API key yahan paste karein."
 )
 
-# Model Selection
+# Model Selection - Standard Stable Models for Free Tier
 selected_model = st.sidebar.selectbox(
     "Choose Gemini Model",
-    ["gemini-3.5-flash", "gemini-2.5-pro"]
+    ["gemini-1.5-flash", "gemini-1.5-pro"]
 )
 
 # Teaching Language
@@ -73,7 +73,7 @@ if prompt := st.chat_input("Apna trading sawal yahan likho..."):
             
             try:
                 # Initialize Gemini Client with user's provided API Key
-                client = genai.Client(api_key=user_api_key)
+                client = genai.Client(api_key=user_api_key.strip())
                 
                 system_instruction = f"""
                 You are a world-class trading mentor at SHAHROZ AI TRADING ACADEMY.
@@ -82,8 +82,10 @@ if prompt := st.chat_input("Apna trading sawal yahan likho..."):
                 You must reply in {language}. Keep the tone engaging, helpful, and educational.
                 """
                 
+                # Limit conversation history to last 6 messages to avoid Rate Limit errors
+                recent_messages = st.session_state.messages[-6:]
                 contents = []
-                for m in st.session_state.messages:
+                for m in recent_messages:
                     role_name = "user" if m["role"] == "user" else "model"
                     contents.append({"role": role_name, "parts": [{"text": m["content"]}]})
                 
