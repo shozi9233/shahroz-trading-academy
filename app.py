@@ -12,10 +12,9 @@ from google.genai import types
 # Option 1 (sab se aasan): apni API key neeche quotes ke andar paste karein.
 # Option 2 (behtar/safe): Streamlit Secrets ya Environment Variable mein
 #          GEMINI_API_KEY naam se rakhein, phir yahan kuch likhne ki zaroorat nahi.
-HARDCODED_API_KEY = "AQ.Ab8RN6LR8y6UL7x8B2__JXXoh9eXEk-9e1Qry732szzULyxtaw"
+HARDCODED_API_KEY = "PASTE_YOUR_GEMINI_API_KEY_HERE"
 
-MAIN_MODEL = "gemini-3.5-flash"       # asal model
-BACKUP_MODEL = "gemini-2.5-flash"     # agar main model busy ho to ye chalega
+MAIN_MODEL = "gemini-3.8-flash"       # sirf yahi model use hoga
 MAX_MESSAGES_PER_SESSION = 40         # ek student ke liye limit (quota bachane ke liye)
 HISTORY_LIMIT = 10                    # AI ko pichhle kitne messages bhejne hain
 
@@ -189,9 +188,22 @@ def build_contents(messages):
     return contents
 
 
+def is_key_error(text: str) -> bool:
+    t = text.lower()
+    return any(
+        s in t
+        for s in (
+            "api key",
+            "api_key",
+            "permission_denied",
+            "unauthenticated",
+            "leaked",
+        )
+    )
+
+
 def stream_reply(contents, system_instruction):
-    """Jawab ko tukron mein deta hai (streaming). Busy hone par dobara koshish
-    aur backup model par switch karta hai."""
+    """Jawab ko tukron mein deta hai (streaming). Busy hone par dobara koshish karta hai."""
     client = get_client(API_KEY)
     config = types.GenerateContentConfig(
         system_instruction=system_instruction,
@@ -199,8 +211,8 @@ def stream_reply(contents, system_instruction):
     )
 
     last_error = None
-    for model in (MAIN_MODEL, BACKUP_MODEL):
-        for attempt in range(2):
+    for model in (MAIN_MODEL,):
+        for attempt in range(3):
             started = False
             try:
                 stream = client.models.generate_content_stream(
@@ -219,9 +231,8 @@ def stream_reply(contents, system_instruction):
                 last_error = e
                 if started:
                     raise  # jawab aadha aa chuka ho to dobara na bhejein
-                text = str(e).lower()
-                # Key ya permission ka masla ho to dobara koshish ka faida nahi
-                if "api key" in text or "permission" in text or "403" in text:
+                # Key ka masla ho to dobara koshish ka faida nahi
+                if is_key_error(str(e)):
                     raise
                 time.sleep(1.5)
     raise last_error if last_error else RuntimeError("Unknown error")
@@ -236,11 +247,18 @@ def friendly_error(e: Exception) -> str:
         )
     if "503" in t or "unavailable" in t or "overloaded" in t:
         return "🔧 AI server abhi busy hai. Kuch der baad dobara koshish karein."
-    if "api key" in t or "403" in t or "permission" in t or "401" in t:
+    if "leaked" in t:
+        return (
+            "🔑 Academy ki API key leak ho chuki hai aur Google ne use band kar diya hai. "
+            "Admin (Shahroz) ko batayein ke nayi key banaye."
+        )
+    if is_key_error(t):
         return (
             "🔑 Academy ki API key mein masla hai. Admin (Shahroz) ko batayein ke key check kare."
         )
-    return f"❌ Kuch masla aa gaya: {e}"
+    if "404" in t or "not_found" in t:
+        return "🔧 AI model abhi available nahi hai. Admin ko batayein ke model ka naam check kare."
+    return "❌ Kuch masla aa gaya. Thori der baad dobara koshish karein."
 
 
 # =====================================================================
@@ -275,6 +293,8 @@ if prompt:
             st.session_state.messages.append({"role": "assistant", "content": reply})
         except Exception as e:  # noqa: BLE001
             st.error(friendly_error(e))
+            with st.expander("🔧 Technical details (admin ke liye)"):
+                st.code(str(e))
             # Error wale sawal ko history se hata dein taake agla jawab kharab na ho
             st.session_state.messages.pop()
             st.session_state.user_msg_count -= 1
