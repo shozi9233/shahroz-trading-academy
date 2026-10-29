@@ -11,13 +11,13 @@ st.set_page_config(
 # Sidebar Settings
 st.sidebar.markdown("## ⚙️ Academy Settings")
 
-# Hardcoded API Key
-API_KEY = "AQ.Ab8RN6IigFrTg2uE-9Jra_i2zbntXysDJ86iFZ_YiON216AKYw"
+# Hardcoded API Key - Yahan apni ASLI API key paste karein
+API_KEY = "AQ.Ab8RN6IigfrTg2uE-9Jra_i2zbntXysDJ86iFZ_YiON216AXYw"
 
 # Model Selection
 selected_model = st.sidebar.selectbox(
     "Choose Gemini Model",
-    ["gemini-3.5-flash", "gemini-2.5-pro"]
+    ["gemini-3.8-flash", "gemini-2.5-pro"]
 )
 
 # Teaching Language
