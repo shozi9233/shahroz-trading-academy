@@ -17,7 +17,7 @@ API_KEY = "AQ.Ab8RN6JpnVqoqoLtS65-Z2oIuKGX6mGDIfP8jSpbyioGlMj4_g"
 # Model Selection
 selected_model = st.sidebar.selectbox(
     "Choose Gemini Model",
-    ["gemini-3.5-flash", "gemini-2.5-pro"]
+    ["gemini-3.8-flash", "gemini-2.5-pro"]
 )
 
 # Teaching Language
@@ -64,10 +64,9 @@ if prompt := st.chat_input("Apna trading sawal yahan likho..."):
         message_placeholder = st.empty()
         
         try:
-            # Initialize Gemini Client with hardcoded key
+            # Initialize Gemini Client
             client = genai.Client(api_key=API_KEY)
             
-            # System instructions based on settings
             system_instruction = f"""
             You are a world-class trading mentor at SHAHROZ AI TRADING ACADEMY.
             Your personality is {personality}.
@@ -75,7 +74,6 @@ if prompt := st.chat_input("Apna trading sawal yahan likho..."):
             You must reply in {language}. Keep the tone engaging, helpful, and educational.
             """
             
-            # Format conversation history for Gemini
             contents = []
             for m in st.session_state.messages:
                 role_name = "user" if m["role"] == "user" else "model"
