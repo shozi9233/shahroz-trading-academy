@@ -12,7 +12,7 @@ st.set_page_config(
 st.sidebar.markdown("## ⚙️ Academy Settings")
 
 # Hardcoded API Key - Yahan apni ASLI API key paste karein
-API_KEY = "AQ.Ab8RN6IigfrTg2uE-9Jra_i2zbntXysDJ86iFZ_YiON216AXYw"
+API_KEY = "AQ.Ab8RN6JpnVqoqoLtS65-Z2oIuKGX6mGDIfP8jSpbyioGlMj4_g"
 
 # Model Selection
 selected_model = st.sidebar.selectbox(
