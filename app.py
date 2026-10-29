@@ -11,10 +11,10 @@ from google.genai import types
 
 # Option 1 (sab se aasan): apni API key neeche quotes ke andar paste karein.
 # Option 2 (behtar/safe): Streamlit Secrets ya Environment Variable mein
-#          GEMINI_API_KEY naam se rakhein, phir yahan kuch likhne ki zaroorat nahi.
+#           GEMINI_API_KEY naam se rakhein, phir yahan kuch likhne ki zaroorat nahi.
 HARDCODED_API_KEY = "PASTE_YOUR_GEMINI_API_KEY_HERE"
 
-MAIN_MODEL = "gemini-3.8-flash"       # sirf yahi model use hoga
+MAIN_MODEL = "gemini-3.5-flash"       # sirf yahi model use hoga
 MAX_MESSAGES_PER_SESSION = 40         # ek student ke liye limit (quota bachane ke liye)
 HISTORY_LIMIT = 10                    # AI ko pichhle kitne messages bhejne hain
 
